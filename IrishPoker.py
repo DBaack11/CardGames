@@ -1,15 +1,14 @@
-# Add input validation with loops or exception handling
-
 ##############################################################################
 # This section of code introduces the game, gets number of players, validates
 # the input, and creates/initializes the lists for the deck and players
+
 import random
 
 print("Welcome to Irish Poker! \n")
 valid_num_players = False
 
 while not valid_num_players:
-    num_players = int(input("(Maximum of 8 Players)\nEnter the number of players: "))
+    num_players = int(input("(Maximum of 12 Players)\nEnter the number of players: "))
     if 1 < num_players <= 8:
         valid_num_players = True
     else:
@@ -20,7 +19,10 @@ values = [2, 3, 4, 5, 6, 7, 8, 9, 10,
 suits = ["Spades", "Clubs", "Hearts", "Diamonds"]
 deck = []
 players = []
-current_turn = False
+played_cards = []
+round_counter = 0
+current_card = None
+incorrect_points = [0] * num_players
 
 
 ##############################################################################
@@ -47,7 +49,6 @@ def shuffle_deck():
 
 def deal_cards():
     shuffle_deck()
-
     for b in range(4):
         for player in range(len(players)):
             dealt_card = deck.pop()
@@ -60,7 +61,6 @@ def reset_deck():
     shuffle_deck()
 
 
-# try returning at bottom and setting int to answer // DEBUG
 def return_int_value(card):
     card_num = card[:2]
     card_num.rstrip()
@@ -76,10 +76,6 @@ def return_int_value(card):
         answer = int(card_num)
 
     return answer
-
-
-played_cards = []
-round_counter = 0
 
 
 def red_or_black(guess):
@@ -153,81 +149,60 @@ def guess_suit(guess):
         return False
 
 
+def simulate_round(round_type):
+    player_num = 1
+    global round_counter
+    global current_card
+    global incorrect_points
+
+    for player in players:
+        # first_card = player.pop()
+        played_cards.append(player.pop())
+        current_card = played_cards[round_counter]
+        guess = input(f"\nPlayer {player_num}, guess {round_type}: ")
+
+        if round_type == "Red or Black":
+            function = red_or_black(guess)
+        elif round_type == "Higher or Lower":
+            function = higher_or_lower(guess)
+        elif round_type == "Inside or Outside":
+            function = inside_or_outside(guess)
+        elif round_type == "Suit":
+            function = guess_suit(guess)
+
+        if function:
+            print(f"Correct! \nCard: {current_card}")
+        else:
+            print(f"Wrong! \nCard: {current_card}")
+            incorrect_points[player_num - 1] += 1
+
+        player_num += 1
+        round_counter += 1
+
+
 ##############################################################################
 # this section of code simulates game play by creating the game, dealing the
 # cards, and executes the logic for game play and determining the winner
 
 create_game()
 deal_cards()
-game_over = False
 print(f"Player's Hands: {players}")
-# print(f"Remaining Deck ({len(deck)} cards): {deck}")
 
+simulate_round("Red or Black")
+simulate_round("Higher or Lower")
+simulate_round("Inside or Outside")
+simulate_round("Suit")
 
-# OR do first card then second card then third card, assigning value of input, use input validation
+# bus_rider = [i for i, x in enumerate(incorrect_points) if x == max(incorrect_points)]
+#
+# consecutive_correct = True
+# for rider in bus_rider:
+#     while consecutive_correct:
+#         if()
 
-incorrect_points = []
-
-# while round_counter != (num_players * 4):
-#   round_counter = num_players * 4
-
-# for each player, check red or black, increment round counter, add incorrect points
-player_num = 1
-for player in players:
-    # first_card = player.pop()
-    played_cards.append(player.pop())
-    current_card = played_cards[round_counter]
-    red_or_black_guess = input(f"\nPlayer {player_num}, guess Red or Black: ")
-    if red_or_black(red_or_black_guess):
-        print(f"Correct! \nCard: {current_card}")
-    else:
-        print(f"Wrong! \nCard: {current_card}")
-        # add incorrect points to list
-    player_num += 1
-    round_counter += 1
-
-    # for each player, check higher or lower, increment round counter, add incorrect points
-player_num = 1
-for player in players:
-
-    played_cards.append(player.pop())
-    current_card = played_cards[round_counter]
-    higher_or_lower_guess = input(f"\nPlayer {player_num}, guess Higher or Lower: ")
-    if higher_or_lower(higher_or_lower_guess):
-        print(f"Correct! \nCard: {current_card}")
-    else:
-        print(f"Wrong! \nCard: {current_card}")
-    player_num += 1
-    round_counter += 1
-
-    # for each player, check inside or outside, increment round counter, add incorrect points
-player_num = 1
-for player in players:
-    played_cards.append(player.pop())
-    current_card = played_cards[round_counter]
-    inside_or_outside_guess = input(f"\nPlayer {player_num}, guess Inside or Outside: ")
-    if inside_or_outside(inside_or_outside_guess):
-        print(f"Correct! \nCard: {current_card}")
-    else:
-        print(f"Wrong! \nCard: {current_card}")
-    player_num += 1
-    round_counter += 1
-
-    # for each player, check suit, increment round counter, add incorrect points
-player_num = 1
-for player in players:
-    played_cards.append(player.pop())
-    current_card = played_cards[round_counter]
-    suit_guess = input(f"\nPlayer {player_num}, guess the suit: ")
-    if guess_suit(suit_guess):
-        print(f"Correct! \nCard: {current_card}")
-    else:
-        print(f"Wrong! \nCard: {current_card}")
-        # add incorrect points
-    player_num += 1
-    round_counter += 1
-
-print(played_cards)
+# print(played_cards)
+# print(incorrect_points)
+# print(bus_rider)
 
 # once round counter is reached, identify most incorrect points and they ride the bus
 
@@ -238,4 +213,4 @@ print(played_cards)
 # have boolean value for if four in a row right, while loop popping cards off reshuffled deck (reshuffle function)
 # functions will be called and if incorrect, restart, else once four in a row is true, break loop and game over
 
-# ADD INPUT VALIDATION
+# ADD INPUT VALIDATION WITH LOOPS OR EXCEPTION HANDLING
