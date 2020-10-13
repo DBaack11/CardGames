@@ -2,8 +2,8 @@
 # This section of code introduces the game, gets number of players, validates
 # the input, and creates/initializes the lists for the deck and players
 
-# have names as input and put in list and refer to list
-# have loop asking if want to play again
+# PLAY AGAIN LOOP
+# INPUT VALIDATION
 
 import random
 
@@ -17,7 +17,12 @@ while not valid_num_players:
     else:
         print("\nSorry! Must have at least 2 players and no more than 12!")
 
+names = []
 # IMPLEMENT NAME - assign to list and use counters and variable to appropriately know who is playing each time
+print("\n")
+for person in range(num_players):
+    player_name = input(f"Player {person + 1}, enter your name: ")
+    names.append(player_name)
 
 values = [2, 3, 4, 5, 6, 7, 8, 9, 10,
           "Jack", "Queen", "King", "Ace"]
@@ -30,6 +35,7 @@ current_card = None
 incorrect_points = [0] * num_players
 round_boolean = False
 riding_bus = False
+function = None
 
 
 ##############################################################################
@@ -103,7 +109,7 @@ def higher_or_lower(guess):
     if riding_bus:
         previous = return_int_value(played_cards[round_counter - 1])
     else:
-        previous = return_int_value(played_cards[round_counter - 2])
+        previous = return_int_value(played_cards[round_counter - num_players])
 
     if current > previous:
         answer = "higher"
@@ -126,8 +132,8 @@ def inside_or_outside(guess):
         previous = return_int_value(played_cards[round_counter - 1])
         initial = return_int_value(played_cards[round_counter - 2])
     else:
-        previous = return_int_value(played_cards[round_counter - 2])
-        initial = return_int_value(played_cards[round_counter - 4])
+        previous = return_int_value(played_cards[round_counter - num_players])
+        initial = return_int_value(played_cards[round_counter - (num_players * 2)])
 
     low_range = min(previous, initial)
     high_range = max(previous, initial)
@@ -165,35 +171,54 @@ def guess_suit(guess):
 
 def simulate_round(round_type):
     # implement name
-    player_num = 1
     global round_counter
     global current_card
     global incorrect_points
     global round_boolean
+    global player_num
+    global function
+    initial = None
+    previous = None
     round_boolean = False
 
+    if not riding_bus:
+        player_num = 0
+
     for player in players:
+
+        if len(played_cards) > 0:
+            if riding_bus:
+                if round_counter > 0:
+                    previous = played_cards[round_counter - 1]
+                    if round_counter >= 2:
+                        initial = played_cards[round_counter - 2]
+            else:
+                if round_counter > 1:
+                    previous = played_cards[round_counter - num_players]
+                    if round_counter >= (num_players * 2):
+                        initial = played_cards[round_counter - (num_players * 2)]
+
         played_cards.append(player.pop())
         current_card = played_cards[round_counter]
-        guess = input(f"\nPlayer {player_num}, guess {round_type}: ")
+        guess = input(f"\n\nPrevious Card(s): [{initial}, {previous}] \n{names[player_num]}, guess {round_type}: ")
 
-        if round_type == "Red or Black":
+        if round_type == "RED or BLACK":
             function = red_or_black(guess)
-        elif round_type == "Higher or Lower":
+        elif round_type == "HIGHER or LOWER":
             function = higher_or_lower(guess)
-        elif round_type == "Inside or Outside":
+        elif round_type == "INSIDE or OUTSIDE":
             function = inside_or_outside(guess)
-        elif round_type == "Suit":
+        elif round_type == "SUIT":
             function = guess_suit(guess)
 
         if function:
-            print(f"Correct! \nCard: {current_card}")
+            print(f"CORRECT! \nCard: {current_card}")
             round_boolean = True
         else:
-            print(f"Wrong! \nCard: {current_card}")
-            incorrect_points[player_num - 1] += 1
-
-        player_num += 1
+            print(f"WRONG! \nCard: {current_card}")
+            incorrect_points[player_num] += 1
+        if not riding_bus:
+            player_num += 1
         round_counter += 1
 
 
@@ -201,43 +226,57 @@ def simulate_round(round_type):
 # this section of code simulates game play by creating the game, dealing the
 # cards, and executes the logic for game play and determining the winner
 
+# add get info function (first chunks of code)
 create_game()
 deal_cards()
-#print(f"Player's Hands: {players}")
+# print(f"Player's Hands: {players}")
 
-simulate_round("Red or Black")
-simulate_round("Higher or Lower")
-simulate_round("Inside or Outside")
-simulate_round("Suit")
+simulate_round("RED or BLACK")
+simulate_round("HIGHER or LOWER")
+simulate_round("INSIDE or OUTSIDE")
+simulate_round("SUIT")
+# add ride the bus function
 
 
 print("\nRIDE THE BUS")
 bus_rider = [i for i, x in enumerate(incorrect_points) if x == max(incorrect_points)]
-riding_bus = True
+
+counter = 0
+for name in bus_rider:
+    int_value = bus_rider[counter]
+    names.append(names[int_value])
+    counter += 1
+
+names = names[-(len(bus_rider)):]
+print(names)
 
 # check if have to reset any variables and player list has to get the deck as its hand so it pops off one by one
 players = [0]
+riding_bus = True
+player_num = 0
 for rider in bus_rider:
     consecutive_correct = False
+    round_counter = 0
     reset_deck()
+    played_cards = []
     players[0] = deck
-    #implement name
+    # implement name
     # TEMP
     print(f"Player's Deck: {players[0]}")
 
-# DEBUG LOOP, POTENTIALLY NEST ALL IF STATEMENTS
-# problem with two people riding the bus, when initial simulate round function is called it acts as if multiple people are going
-# and alternates turns but error because player two does not have any items
-# figure out how to have code not alternate turns when riding bus or incrementally add players to players
+    # DEBUG LOOP, POTENTIALLY NEST ALL IF STATEMENTS
+    # problem with two people riding the bus, when initial simulate round function is called it acts as if multiple people are going
+    # and alternates turns but error because player two does not have any items
+    # figure out how to have code not alternate turns when riding bus or incrementally add players to players
     while not consecutive_correct:
         if len(deck) > 0:
-            simulate_round("Red or Black")
+            simulate_round("RED or BLACK")
             if round_boolean:
-                simulate_round("Higher or Lower")
+                simulate_round("HIGHER or LOWER")
                 if round_boolean:
-                    simulate_round("Inside or Outside")
+                    simulate_round("INSIDE or OUTSIDE")
                     if round_boolean:
-                        simulate_round("Suit")
+                        simulate_round("SUIT")
                         if round_boolean:
                             consecutive_correct = True
                         else:
@@ -250,8 +289,11 @@ for rider in bus_rider:
                 print("Restart the Ride!")
         else:
             reset_deck()
+    print("\n##########################################")
+    print(f"        Congratulations! You Win! \n  It took you {round_counter} cards to 'Ride The Bus'!")
+    print("##########################################")
+    player_num += 1
 
-    print("Congratulations! You successfully 'Rode The Bus'! ")
 # print(played_cards)
 # print(incorrect_points)
 # print(bus_rider)
