@@ -251,7 +251,7 @@ for rider in bus_rider:
         else:
             reset_deck()
 
-    print("Congratulations! You successfully "Rode The Bus"! ")
+    print("Congratulations! You successfully 'Rode The Bus'! ")
 # print(played_cards)
 # print(incorrect_points)
 # print(bus_rider)
